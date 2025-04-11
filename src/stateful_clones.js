@@ -1,38 +1,34 @@
-/**
- * @param {Object} state
- * @param {Object[]} actions
- */
-function transformState(state, actions) {
+function transformStateWithClones(state, actions) {
+    let currentState = { ...state }; // początkowa kopia stanu
+    const history = [];
+  
     for (const action of actions) {
       switch (action.type) {
+        case 'clear':
+          currentState = {};
+          break;
+  
         case 'addProperties':
-          addProperties(state, action.extraData);
+          currentState = { ...currentState, ...action.extraData };
           break;
   
         case 'removeProperties':
-          removeProperties(state, action.keysToRemove);
+          currentState = { ...currentState };
+          for (const key of action.keysToRemove) {
+            delete currentState[key];
+          }
           break;
   
-        case 'clear':
-          clearProperties(state);
+        default:
+          // Jeśli pojawi się nieznany typ akcji, można go zignorować lub rzucić wyjątek.
+          // Tu ignorujemy.
           break;
       }
-    }
-  }
   
-  function addProperties(state, extraData) {
-    Object.assign(state, extraData);
-  }
-  
-  function removeProperties(state, keysToRemove) {
-    for (const key of keysToRemove) {
-      delete state[key];
+      // Dodajemy kopię stanu do historii (żeby nie wskazywała na ten sam obiekt)
+      history.push({ ...currentState });
     }
-  }
   
-  function clearProperties(state) {
-    for (const key in state) {
-      delete state[key];
-    }
+    return history;
   }
   
